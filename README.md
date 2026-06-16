@@ -137,9 +137,10 @@ PATCH  /api/apps/{id}
 DELETE /api/apps/{id}   only if DELETE_REMOVED=1
 ```
 
-New apps are created with the name `Static: <folder>`. After creation, the
-watcher does not update the Homarr app name, so names changed manually in
-Homarr stay changed.
+New apps are created with the name `Static: <folder>` plus the configured
+description and icon URL. After creation, the watcher does not update the
+Homarr app name, description, or icon URL, so values changed manually in Homarr
+stay changed.
 
 Note: depending on your Homarr version/layout, API-created Apps may still need to be placed on a board manually. Homarr currently exposes Apps through the API; full board placement automation may depend on your version.
 

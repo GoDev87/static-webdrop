@@ -162,7 +162,7 @@ class HomarrClient:
                 return app
         return None
 
-    def payload(self, name: str, href: str, *, include_name: bool = True) -> dict[str, Any]:
+    def payload(self, name: str, href: str, *, include_managed_metadata: bool = True) -> dict[str, Any]:
         payload = {
             "name": f"Static: {name}",
             "description": self.settings.homarr_description,
@@ -170,8 +170,9 @@ class HomarrClient:
             "href": href,
             "pingUrl": href,
         }
-        if not include_name:
-            payload.pop("name")
+        if not include_managed_metadata:
+            for key in ("name", "description", "iconUrl"):
+                payload.pop(key)
         return payload
 
     def upsert_site(self, name: str, href: str, apps_cache: list[dict[str, Any]]) -> str:
@@ -182,7 +183,7 @@ class HomarrClient:
             if not app_id:
                 print(f"WARN: found existing app for {href}, but it has no id; skipping update")
                 return "skipped"
-            payload = self.payload(name, href, include_name=False)
+            payload = self.payload(name, href, include_managed_metadata=False)
             self._request("PATCH", f"/api/apps/{app_id}", json={"id": app_id, **payload})
             return "updated"
 
