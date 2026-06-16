@@ -171,25 +171,11 @@ class HomarrClient:
             "pingUrl": href,
         }
 
-    def update_payload(self, existing: dict[str, Any], name: str, href: str) -> dict[str, Any]:
-        payload = self.payload(name, href)
-        for key in ("name", "description", "iconUrl"):
-            value = existing.get(key)
-            if isinstance(value, str):
-                payload[key] = value
-        return payload
-
     def upsert_site(self, name: str, href: str, apps_cache: list[dict[str, Any]]) -> str:
         existing = self.find_app(apps_cache, name, href)
 
         if existing:
-            app_id = existing.get("id") or existing.get("appId")
-            if not app_id:
-                print(f"WARN: found existing app for {href}, but it has no id; skipping update")
-                return "skipped"
-            payload = self.update_payload(existing, name, href)
-            self._request("PATCH", f"/api/apps/{app_id}", json={"id": app_id, **payload})
-            return "updated"
+            return "existing"
 
         payload = self.payload(name, href)
         created = self._request("POST", "/api/apps", json=payload).json()

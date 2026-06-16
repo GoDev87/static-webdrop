@@ -128,19 +128,15 @@ HOMARR_URL=http://homarr:7575
 HOMARR_API_KEY=<id>.<token>
 ```
 
-The watcher creates/updates Homarr Apps using:
+The watcher creates missing Homarr Apps using:
 
 ```text
 GET    /api/apps
 POST   /api/apps
-PATCH  /api/apps/{id}
 DELETE /api/apps/{id}   only if DELETE_REMOVED=1
 ```
 
-New apps are created with the name `Static: <folder>` plus the configured
-description and icon URL. After creation, the watcher does not update the
-Homarr app name, description, or icon URL, so values changed manually in Homarr
-stay changed.
+New apps are created with the name `Static: <folder>`.
 
 Note: depending on your Homarr version/layout, API-created Apps may still need to be placed on a board manually. Homarr currently exposes Apps through the API; full board placement automation may depend on your version.
 
