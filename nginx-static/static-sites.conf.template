@@ -1,0 +1,36 @@
+# Default catch-all: never serve /sites directly for unknown hosts.
+server {
+    listen 8080 default_server;
+    server_name _;
+    return 404;
+}
+
+# A folder named /sites/hello is served at hello.<base-domain>
+server {
+    listen 8080;
+    server_name ~^(?<site>[a-z0-9][a-z0-9-]{0,62})\.${SITES_BASE_DOMAIN_REGEX}$;
+
+    root /sites/$site;
+    index index.html;
+    autoindex off;
+    charset utf-8;
+
+    add_header X-Static-Webdrop-Site $site always;
+
+    # Basic health endpoint for reverse proxy checks.
+    location = /_site-health {
+        access_log off;
+        add_header Content-Type text/plain;
+        return 200 "ok\n";
+    }
+
+    # Do not expose dotfiles such as .env, .git, .htaccess.
+    location ~ /\. {
+        deny all;
+    }
+
+    # Normal static files + SPA fallback.
+    location / {
+        try_files $uri $uri/ /index.html =404;
+    }
+}

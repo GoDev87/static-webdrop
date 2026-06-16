@@ -1,0 +1,48 @@
+name: static-webdrop
+
+services:
+  static-sites:
+    build:
+      context: ./nginx-static
+    container_name: static-sites
+    restart: unless-stopped
+    environment:
+      SITES_BASE_DOMAIN: ${SITES_BASE_DOMAIN:?set SITES_BASE_DOMAIN in .env}
+    volumes:
+      - ${HOST_SITES_DIR:-./sites}:/sites:ro
+    ports:
+      - "${STATIC_HTTP_PORT:-127.0.0.1:18080}:8080"
+    networks:
+      - npm
+
+  site-watcher:
+    build:
+      context: ./watcher
+    container_name: static-site-watcher
+    restart: unless-stopped
+    depends_on:
+      - static-sites
+    environment:
+      SITES_DIR: /sites
+      SITES_BASE_DOMAIN: ${SITES_BASE_DOMAIN:?set SITES_BASE_DOMAIN in .env}
+      SCAN_INTERVAL: ${SCAN_INTERVAL:-30}
+      HOMARR_ENABLED: ${HOMARR_ENABLED:-0}
+      HOMARR_URL: ${HOMARR_URL:-http://homarr:7575}
+      HOMARR_API_KEY: ${HOMARR_API_KEY:-}
+      HOMARR_AUTH_MODE: ${HOMARR_AUTH_MODE:-apikey}
+      HOMARR_ICON_URL: ${HOMARR_ICON_URL:-https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons@master/svg/nginx.svg}
+      HOMARR_DESCRIPTION: ${HOMARR_DESCRIPTION:-Static website managed by static-webdrop}
+      DELETE_REMOVED: ${DELETE_REMOVED:-0}
+    volumes:
+      - ${HOST_SITES_DIR:-./sites}:/sites:ro
+      - watcher-data:/data
+    networks:
+      - npm
+
+volumes:
+  watcher-data:
+
+networks:
+  npm:
+    external: true
+    name: ${NPM_NETWORK:-npm}
