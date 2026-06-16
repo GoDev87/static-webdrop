@@ -162,27 +162,31 @@ class HomarrClient:
                 return app
         return None
 
-    def payload(self, name: str, href: str) -> dict[str, Any]:
-        return {
+    def payload(self, name: str, href: str, *, include_name: bool = True) -> dict[str, Any]:
+        payload = {
             "name": f"Static: {name}",
             "description": self.settings.homarr_description,
             "iconUrl": self.settings.homarr_icon_url,
             "href": href,
             "pingUrl": href,
         }
+        if not include_name:
+            payload.pop("name")
+        return payload
 
     def upsert_site(self, name: str, href: str, apps_cache: list[dict[str, Any]]) -> str:
         existing = self.find_app(apps_cache, name, href)
-        payload = self.payload(name, href)
 
         if existing:
             app_id = existing.get("id") or existing.get("appId")
             if not app_id:
                 print(f"WARN: found existing app for {href}, but it has no id; skipping update")
                 return "skipped"
+            payload = self.payload(name, href, include_name=False)
             self._request("PATCH", f"/api/apps/{app_id}", json={"id": app_id, **payload})
             return "updated"
 
+        payload = self.payload(name, href)
         created = self._request("POST", "/api/apps", json=payload).json()
         app_id = created.get("id") or created.get("appId") if isinstance(created, dict) else None
         if app_id:
