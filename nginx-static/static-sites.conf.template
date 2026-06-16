@@ -8,7 +8,7 @@ server {
 # A folder named /sites/hello is served at hello.<base-domain>
 server {
     listen 8080;
-    server_name ~^(?<site>[a-z0-9][a-z0-9-]{0,62})\.${SITES_BASE_DOMAIN_REGEX}$;
+    server_name "~^(?<site>[a-z0-9][a-z0-9-]{0,62})\.${SITES_BASE_DOMAIN_REGEX}$";
 
     root /sites/$site;
     index index.html;
